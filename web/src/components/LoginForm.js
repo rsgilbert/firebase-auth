@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Form, Modal, ProgressBar, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {  faSignIn } from "@fortawesome/free-solid-svg-icons";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+import { faSignIn } from "@fortawesome/free-solid-svg-icons";
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { initializeFirebaseApp } from '../my-firebase-app'
 
 
@@ -13,20 +13,43 @@ import { initializeFirebaseApp } from '../my-firebase-app'
 export function LoginForm(props) {
     const show = props.show;
     const setShow = props.setShow;
+    const [loginInProgress, setLoginInProgress] = useState(false)
     const handleClose = () => setShow(false)
     const [form, setForm] = useState({
         Email: '',
         Password: ''
     })
+    const [errorMessage, setErrorMessage] = useState('')
 
- 
+
     async function handleSubmit() {
-        console.log('submitting form', form)
-        const firebaseApp = initializeFirebaseApp()
-        const auth = getAuth()
-        const userCredential = await createUserWithEmailAndPassword(auth, form.Email, form.Password)
-        console.log({ userCredential })
-        sendEmailVerification(userCredential.user)
+        try {
+           // setLoginInProgress(true)
+            setErrorMessage('')
+            console.log('submitting form', form)
+            if (!form.Email?.includes('@')) {
+                setErrorMessage(`Invalid email address ${form.Email}`)
+                return
+            }
+            if (form.Password?.length < 6) {
+                setErrorMessage('Short password')
+                return;
+            }
+
+            const firebaseApp = initializeFirebaseApp()
+            const auth = getAuth()
+            const userCredential = await signInWithEmailAndPassword(auth, form.Email, form.Password)
+            console.log({ userCredential })
+        }
+        catch (e) {
+            console.log(e)
+            setErrorMessage(e.message)
+        }
+        finally {
+            setTimeout(() => {
+                setLoginInProgress(false)
+            }, 200)
+        }
     }
 
     const handleFormChange = e => {
@@ -39,6 +62,7 @@ export function LoginForm(props) {
                 <Modal.Title>Login</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <Alert variant="danger" hidden={!errorMessage}>Error: {errorMessage}</Alert>
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label>Email</Form.Label>
@@ -51,11 +75,20 @@ export function LoginForm(props) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="success" onClick={handleSubmit}>
-                    <FontAwesomeIcon icon={faSignIn} />
-                    &nbsp;
-                    Login
-                </Button >
+                {loginInProgress &&
+                    <Button variant="success" onClick={handleSubmit} disabled>
+                        <Spinner size='sm' />
+                        &nbsp;
+                        Logging in
+                    </Button >
+                }
+                {!loginInProgress &&
+                    <Button variant="success" onClick={handleSubmit}>
+                        <FontAwesomeIcon icon={faSignIn} />
+                        &nbsp;
+                        Login
+                    </Button >
+                }
             </Modal.Footer>
         </Modal>
     )
