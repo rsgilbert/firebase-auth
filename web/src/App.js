@@ -35,7 +35,6 @@ function App() {
 
     
     auth.onAuthStateChanged(user => {
-        console.log({ user })
         const newLoginStatus = user !== null 
         if(newLoginStatus !== isLoggedIn) {
             // only update the state when it changes, otherwises you may end up in an infinite loop

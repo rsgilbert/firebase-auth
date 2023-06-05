@@ -2,12 +2,12 @@ import React from "react";
 import { getAuth,  } from 'firebase/auth'
 import { Button } from "react-bootstrap";
 import { initializeFirebaseApp } from "../my-firebase-app";
+import { UploadFile } from "./UploadFile";
 
 
 initializeFirebaseApp()
 const auth = getAuth()
-console.log(auth)
-console.log({ currentUser: auth.currentUser })
+// console.log({ currentUser: auth.currentUser })
 
 const handleShowUser = () => {
     console.log({ usr: auth.currentUser })
@@ -17,12 +17,6 @@ const handleSignout = () => {
     auth.signOut()
 }
 
-auth.onAuthStateChanged(user =>{ 
-    if(user === null) {
-        console.log('No logged in user')
-    }
-    console.log({ userIs: user })
-})
 
 
 export function Home() {
@@ -30,7 +24,10 @@ export function Home() {
         <div>
             <h1>Home</h1>
 
-            <Button onClick={handleShowUser}>
+            <UploadFile />
+
+            <div style={{marginTop: 100 }} />
+            <Button onClick={handleShowUser} style={{marginRight: 10 }}>
                 SHOW USER
             </Button>
 
