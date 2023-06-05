@@ -36,7 +36,6 @@ export function LoginForm(props) {
                 return;
             }
 
-            const firebaseApp = initializeFirebaseApp()
             const auth = getAuth()
             const userCredential = await signInWithEmailAndPassword(auth, form.Email, form.Password)
             console.log({ userCredential })
